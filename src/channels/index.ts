@@ -10,3 +10,6 @@
 // telegram
 
 // whatsapp
+
+// xmpp
+import './xmpp.js';
