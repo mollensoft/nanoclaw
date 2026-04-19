@@ -122,13 +122,20 @@ function makeXmppChannel(
       const body = stanza.getChild('body')?.getText()?.trim();
       if (!body) return; // typing notifications, receipts, etc.
 
+      const timestamp = new Date().toISOString();
+      const senderName = senderBareJid.split('@')[0] ?? senderBareJid;
+
+      // Upsert the chat row before storing the message — messages.chat_jid has
+      // a FK on chats.jid, so the row must exist first or storeMessage throws.
+      opts.onChatMetadata(senderBareJid, timestamp, senderName, 'xmpp', false);
+
       const message: NewMessage = {
         id: `xmpp-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
         chat_jid: senderBareJid,
         sender: senderBareJid,
-        sender_name: senderBareJid.split('@')[0] ?? senderBareJid,
+        sender_name: senderName,
         content: body,
-        timestamp: new Date().toISOString(),
+        timestamp,
         is_from_me: false,
         is_bot_message: false,
       };
